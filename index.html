@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mehul Bhojraj — Machine Learning Portfolio</title>
+<meta name="description" content="Machine learning portfolio: churn prediction, fraud detection, and house price regression — with live metrics refreshed by GitHub Actions.">
+<style>
+  :root {
+    --bg: #0b0f14; --panel: #121821; --panel2: #0f141c; --line: #1e2937;
+    --text: #e6edf3; --muted: #8b98a5; --accent: #4c8dff; --good: #3fb950;
+    --warn: #d29922; --bad: #f85149;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.6 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 40px 20px 80px; }
+  header h1 { margin: 0 0 6px; font-size: 2rem; }
+  header p.sub { margin: 0 0 8px; color: var(--muted); }
+  .live-note {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 10px;
+    background: var(--panel2); border: 1px solid var(--line);
+    padding: 6px 12px; border-radius: 999px; font-size: 0.85rem; color: var(--muted);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good);
+         box-shadow: 0 0 6px var(--good); }
+  .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-top: 28px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .card h2 { margin: 0; font-size: 1.15rem; }
+  .card .tagline { color: var(--muted); font-size: 0.92rem; margin: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    background: var(--panel2); border: 1px solid var(--line); border-radius: 10px;
+    padding: 8px 10px; min-width: 108px;
+  }
+  .chip .k { display: block; font-size: 0.72rem; color: var(--muted);
+             text-transform: uppercase; letter-spacing: 0.4px; }
+  .chip .v { display: block; font-size: 1.15rem; font-weight: 700; color: var(--accent); }
+  .chip .v.good { color: var(--good); }
+  .meta { font-size: 0.8rem; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
+  .meta .status { font-weight: 600; }
+  .meta .status.ok { color: var(--good); }
+  .meta .status.stale { color: var(--warn); }
+  .meta .status.fail { color: var(--bad); }
+  .links { margin-top: auto; display: flex; gap: 14px; flex-wrap: wrap; }
+  .links a { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.92rem; }
+  .links a:hover { text-decoration: underline; }
+  .headline { border-left: 3px solid var(--accent); padding: 6px 12px;
+              background: var(--panel2); border-radius: 0 10px 10px 0; font-size: 0.95rem; }
+  .pipeline { margin-top: 40px; background: var(--panel); border: 1px solid var(--line);
+              border-radius: 14px; padding: 20px; }
+  .pipeline h3 { margin-top: 0; }
+  .pipeline ol { margin: 10px 0 0; padding-left: 20px; color: var(--muted); }
+  .pipeline code { background: var(--panel2); border: 1px solid var(--line);
+                   padding: 1px 6px; border-radius: 6px; font-size: 0.85em; }
+  footer { margin-top: 36px; color: var(--muted); font-size: 0.85rem;
+           display: flex; gap: 16px; flex-wrap: wrap; }
+  footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Mehul Bhojraj — Machine Learning Portfolio</h1>
+    <p class="sub">End-to-end classification &amp; regression projects: leakage-free pipelines, honest evaluation, Gradio demos, and CI that retrains the models.</p>
+    <div class="live-note"><span class="dot"></span><span id="liveStatus">metrics load live from each repo on every visit — last refresh: <span id="lastFetch">…</span></span></div>
+  </header>
+
+  <div class="grid">
+
+    <div class="card" id="card-churn">
+      <h2>Telco Customer Churn</h2>
+      <p class="tagline">Classification on IBM Telco (7,043 customers) — LogReg / RF / GB compared with stratified 5-fold CV; recall lifted via class weights + threshold tuning.</p>
+      <div class="headline">Churn-class recall <b id="churn-before">55.9%</b> → <b id="churn-after">75.1%</b> (threshold tuning, no test leakage)</div>
+      <div class="chips">
+        <div class="chip"><span class="k">ROC-AUC</span><span class="v" id="churn-auc">–</span></div>
+        <div class="chip"><span class="k">Recall (churn)</span><span class="v good" id="churn-recall">–</span></div>
+        <div class="chip"><span class="k">F1 (churn)</span><span class="v" id="churn-f1">–</span></div>
+        <div class="chip"><span class="k">Precision</span><span class="v" id="churn-prec">–</span></div>
+      </div>
+      <div class="meta">
+        <span class="status" id="churn-status">loading…</span>
+        <span id="churn-asof"></span><span>·</span><span>test n=1,409</span>
+      </div>
+      <div class="links">
+        <a href="https://github.com/MehulBlitz/telco-churn-prediction" target="_blank" rel="noopener">GitHub repo →</a>
+        <a href="https://github.com/MehulBlitz/telco-churn-prediction/blob/main/README.md" target="_blank" rel="noopener">Results &amp; figures</a>
+      </div>
+    </div>
+
+    <div class="card" id="card-fraud">
+      <h2>Credit Card Fraud Detection</h2>
+      <p class="tagline">Imbalanced classification on 284,807 transactions (0.173% fraud) — SMOTE inside CV folds, temporal holdout, PR-curve-first evaluation.</p>
+      <div class="headline">55 of 75 frauds caught at <b>98.2% precision</b> — 1 false alarm in 56,961 legit transactions</div>
+      <div class="chips">
+        <div class="chip"><span class="k">PR-AUC</span><span class="v" id="fraud-prauc">–</span></div>
+        <div class="chip"><span class="k">F1 (fraud)</span><span class="v good" id="fraud-f1">–</span></div>
+        <div class="chip"><span class="k">Precision</span><span class="v" id="fraud-prec">–</span></div>
+        <div class="chip"><span class="k">Recall</span><span class="v" id="fraud-recall">–</span></div>
+      </div>
+      <div class="meta">
+        <span class="status" id="fraud-status">loading…</span>
+        <span id="fraud-asof"></span><span>·</span><span>temporal test n=56,961</span>
+      </div>
+      <div class="links">
+        <a href="https://github.com/MehulBlitz/credit-card-fraud-detection" target="_blank" rel="noopener">GitHub repo →</a>
+        <a href="https://github.com/MehulBlitz/credit-card-fraud-detection/blob/main/README.md" target="_blank" rel="noopener">Results &amp; figures</a>
+      </div>
+    </div>
+
+    <div class="card" id="card-house">
+      <h2>House Price Prediction</h2>
+      <p class="tagline">Regression on California Housing (20,640 block groups) — Linear / Ridge / Lasso / RF with learning-curve bias-variance analysis.</p>
+      <div class="headline">Test RMSE down <b id="house-improve">23.3%</b> vs the linear baseline; R² 0.66 → <b id="house-r2">0.80</b></div>
+      <div class="chips">
+        <div class="chip"><span class="k">RMSE ($100k)</span><span class="v" id="house-rmse">–</span></div>
+        <div class="chip"><span class="k">MAE</span><span class="v" id="house-mae">–</span></div>
+        <div class="chip"><span class="k">R²</span><span class="v good" id="house-r2chip">–</span></div>
+        <div class="chip"><span class="k">CV RMSE</span><span class="v" id="house-cv">–</span></div>
+      </div>
+      <div class="meta">
+        <span class="status" id="house-status">loading…</span>
+        <span id="house-asof"></span><span>·</span><span>test n=4,128</span>
+      </div>
+      <div class="links">
+        <a href="https://github.com/MehulBlitz/house-price-prediction" target="_blank" rel="noopener">GitHub repo →</a>
+        <a href="https://github.com/MehulBlitz/house-price-prediction/blob/main/README.md" target="_blank" rel="noopener">Results &amp; figures</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="pipeline">
+    <h3>Why the numbers above are current — not screenshots</h3>
+    <ol>
+      <li>Each repo ships a GitHub Actions workflow (<code>setup-python</code> → <code>pip install</code> → full retrain with <code>GridSearchCV</code> → commit refreshed <code>artifacts/metrics.json</code> + figures).</li>
+      <li>Workflows run on a schedule (churn monthly, fraud quarterly, house monthly) and on every push that touches training code.</li>
+      <li>This page fetches each repo's <code>metrics.json</code> live at page load and re-renders the cards — the same numbers the repos' READMEs show.</li>
+      <li>Interactive demos: each repo includes a Gradio app (<code>python app.py</code>); the churn and fraud apps ship with trained models included.</li>
+    </ol>
+  </div>
+
+  <footer>
+    <span>© <span id="year"></span> Mehul Bhojraj</span>
+    <a href="https://github.com/MehulBlitz" target="_blank" rel="noopener">github.com/MehulBlitz</a>
+  </footer>
+</div>
+
+<script>
+const REPOS = {
+  churn: "MehulBlitz/telco-churn-prediction",
+  fraud: "MehulBlitz/credit-card-fraud-detection",
+  house: "MehulBlitz/house-price-prediction",
+};
+const pct = v => (v * 100).toFixed(1) + "%";
+
+function setStatus(id, cls, text) {
+  const el = document.getElementById(id);
+  el.className = "status " + cls;
+  el.textContent = text;
+}
+
+async function fetchMetrics(repo) {
+  const url = `https://raw.githubusercontent.com/${repo}/main/artifacts/metrics.json?t=${Date.now()}`;
+  const r = await fetch(url, { cache: "no-store" });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.json();
+}
+
+function fmtAgo(iso) {
+  if (!iso) return "";
+  const d = Math.round((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (isNaN(d)) return "";
+  return d <= 0 ? "today" : `${d} day${d === 1 ? "" : "s"} ago`;
+}
+
+function renderChurn(m) {
+  const h = m.headline, w = m.winner_model;
+  document.getElementById("churn-auc").textContent = h.roc_auc.toFixed(3);
+  document.getElementById("churn-recall").textContent = pct(h.recall_tuned_threshold);
+  document.getElementById("churn-f1").textContent = h.f1_tuned_threshold.toFixed(3);
+  const tuned = m.models[w]["test_tuned_threshold"];
+  document.getElementById("churn-prec").textContent = tuned.precision_churn.toFixed(3);
+  document.getElementById("churn-before").textContent = pct(h.recall_baseline_no_class_weights);
+  document.getElementById("churn-after").textContent = pct(h.recall_tuned_threshold);
+  document.getElementById("churn-asof").textContent = "updated " + fmtAgo(m.generated_at);
+  setStatus("churn-status", "ok", "● live from repo");
+}
+
+function renderFraud(m) {
+  const h = m.headline;
+  document.getElementById("fraud-prauc").textContent = h.pr_auc.toFixed(3);
+  document.getElementById("fraud-f1").textContent = h.f1_fraud.toFixed(3);
+  document.getElementById("fraud-prec").textContent = h.precision_fraud.toFixed(3);
+  document.getElementById("fraud-recall").textContent = pct(h.recall_fraud);
+  document.getElementById("fraud-asof").textContent = "updated " + fmtAgo(m.generated_at);
+  setStatus("fraud-status", "ok", "● live from repo");
+}
+
+function renderHouse(m) {
+  const rf = m.results["Random Forest"], lin = m.results["Linear Regression"];
+  document.getElementById("house-rmse").textContent = rf.rmse.toFixed(3);
+  document.getElementById("house-mae").textContent = rf.mae.toFixed(3);
+  document.getElementById("house-r2chip").textContent = rf.r2.toFixed(3);
+  document.getElementById("house-r2").textContent = rf.r2.toFixed(2);
+  document.getElementById("house-cv").textContent = rf.cv_rmse.toFixed(3);
+  document.getElementById("house-improve").textContent = m.rmse_improvement_pct_over_baseline.toFixed(1) + "%";
+  document.getElementById("house-asof").textContent = "updated " + fmtAgo(m.generated_at);
+  setStatus("house-status", "ok", "● live from repo");
+}
+
+const FALLBACK = {
+  churn: { generated_at: null, headline: { roc_auc: 0.8442, recall_tuned_threshold: 0.7513, f1_tuned_threshold: 0.6372, recall_baseline_no_class_weights: 0.5588 }, winner_model: "Random Forest", models: { "Random Forest": { test_tuned_threshold: { precision_churn: 0.5531 } } } },
+  fraud: { generated_at: null, headline: { pr_auc: 0.8232, f1_fraud: 0.8397, precision_fraud: 0.9821, recall_fraud: 0.7333 } },
+  house: { generated_at: null, results: { "Random Forest": { rmse: 0.5084, mae: 0.3323, r2: 0.8028, cv_rmse: 0.51 }, "Linear Regression": {} }, rmse_improvement_pct_over_baseline: 23.3 },
+};
+
+async function load(key, renderFn) {
+  try {
+    const m = await fetchMetrics(REPOS[key]);
+    renderFn(m);
+  } catch (e) {
+    renderFn(FALLBACK[key]);
+    setStatus(key + "-status", "stale", "○ cached values (repo fetch failed)");
+  }
+}
+
+document.getElementById("year").textContent = new Date().getFullYear();
+document.getElementById("lastFetch").textContent = new Date().toLocaleTimeString();
+Promise.allSettled([
+  load("churn", renderChurn),
+  load("fraud", renderFraud),
+  load("house", renderHouse),
+]);
+</script>
+</body>
+</html>
